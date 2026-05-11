@@ -5,7 +5,7 @@
 
 // ── CONFIGURACIÓN ──────────────────────────
 // Pega aquí la URL de tu Google Apps Script desplegado
-const SHEETS_URL = 'TU_APPS_SCRIPT_URL_AQUI';
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyGYB3o16pTS3MTc4btsKWBKJSwsda_FPU_AYLo_RBQ85JYAvnQDeHsS6mBPMBymC3f/exec';
 
 // Auto-retorno al inicio tras N segundos de inactividad
 const IDLE_TIMEOUT_MS = 120_000; // 2 minutos
