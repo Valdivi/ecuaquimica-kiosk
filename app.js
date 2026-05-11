@@ -5,7 +5,7 @@
 
 // ── CONFIGURACIÓN ──────────────────────────
 // Pega aquí la URL de tu Google Apps Script desplegado
-const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyGYB3o16pTS3MTc4btsKWBKJSwsda_FPU_AYLo_RBQ85JYAvnQDeHsS6mBPMBymC3f/exec';
+const SHEETS_URL = 'TU_APPS_SCRIPT_URL_AQUI';
 
 // Auto-retorno al inicio tras N segundos de inactividad
 const IDLE_TIMEOUT_MS = 120_000; // 2 minutos
@@ -159,13 +159,12 @@ async function submitLead(e) {
         catalogo: payload.catalogo,
         fecha:    payload.fecha,
       });
-      // Técnica pixel: Apps Script acepta GET, evita problemas CORS
-      await new Promise((resolve) => {
-        const img = new Image();
-        img.onload = img.onerror = resolve;
-        img.src = `${SHEETS_URL}?${params.toString()}`;
-        setTimeout(resolve, 4000); // timeout 4s
+      fetch(`${SHEETS_URL}?${params.toString()}`, {
+        method: 'GET',
+        mode: 'no-cors',
       });
+      // Esperamos 2s para dar tiempo al script
+      await new Promise(r => setTimeout(r, 2000));
     }
 
     // Fallback: guardar en localStorage como respaldo
