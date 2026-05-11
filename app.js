@@ -150,9 +150,7 @@ async function submitLead(e) {
   };
 
   try {
-    // Si SHEETS_URL no está configurado, solo guardamos localmente
     if (SHEETS_URL !== 'TU_APPS_SCRIPT_URL_AQUI') {
-      // Apps Script requiere GET con parámetros en la URL (no-cors no envía body)
       const params = new URLSearchParams({
         nombre:   payload.nombre,
         apellido: payload.apellido,
@@ -161,9 +159,12 @@ async function submitLead(e) {
         catalogo: payload.catalogo,
         fecha:    payload.fecha,
       });
-      await fetch(`${SHEETS_URL}?${params.toString()}`, {
-        method: 'GET',
-        mode: 'no-cors',
+      // Técnica pixel: Apps Script acepta GET, evita problemas CORS
+      await new Promise((resolve) => {
+        const img = new Image();
+        img.onload = img.onerror = resolve;
+        img.src = `${SHEETS_URL}?${params.toString()}`;
+        setTimeout(resolve, 4000); // timeout 4s
       });
     }
 
