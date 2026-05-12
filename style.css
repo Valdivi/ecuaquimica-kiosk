@@ -29,8 +29,9 @@ body {
   user-select: none;
   -webkit-user-select: none;
   background: #eaeaea url('assets/fondo-degradado.png') center center / cover no-repeat fixed;
+  background-attachment: fixed;
   min-height: 100vh;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 /* ════════════════════════════════════════════
@@ -60,6 +61,8 @@ body {
   align-items: center;
   padding: 0 16px 160px;
   min-height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .main-header {
@@ -394,9 +397,17 @@ input.has-error, select.has-error { border-color: #e74c3c; background: #fff8f8; 
    TABLET (600px – 1199px) — columna única
 ════════════════════════════════════════════ */
 @media (min-width: 600px) and (max-width: 1199px) {
-  #screen-main { padding: 0 32px 160px; }
+  body {
+    background-attachment: fixed;
+    overflow: hidden;
+  }
+  #screen-main {
+    padding: 0 32px 160px;
+    overflow-y: auto;
+    height: 100vh;
+  }
   .main-header { padding: 36px 0 28px; }
-  .main-logo { height: 90px; }
+  .main-logo { height: 113px; } /* 90px + 25% = 113px */
   .catalog-grid {
     display: flex;
     flex-direction: column;
