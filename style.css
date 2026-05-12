@@ -391,9 +391,27 @@ input.has-error, select.has-error { border-color: #e74c3c; background: #fff8f8; 
 .success-msg { font-size: 1rem; color: var(--text-muted); line-height: 1.7; }
 
 /* ════════════════════════════════════════════
-   DESKTOP ≥ 1024px
+   TABLET (600px – 1199px) — columna única
 ════════════════════════════════════════════ */
-@media (min-width: 1024px) {
+@media (min-width: 600px) and (max-width: 1199px) {
+  #screen-main { padding: 0 32px 160px; }
+  .main-header { padding: 36px 0 28px; }
+  .main-logo { height: 90px; }
+  .catalog-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    max-width: 680px;
+  }
+  .catalog-btn { aspect-ratio: 16 / 7; border-radius: 28px; }
+  .catalog-btn img { border-radius: 28px; }
+  .contact-btn { width: 90px; height: 90px; bottom: 32px; right: 32px; }
+}
+
+/* ════════════════════════════════════════════
+   DESKTOP ≥ 1200px
+════════════════════════════════════════════ */
+@media (min-width: 1200px) {
   #screen-main { padding: 0 60px 160px; }
   .main-header { padding: 48px 0 36px; }
   .main-logo { height: 110px; }
