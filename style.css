@@ -155,6 +155,11 @@ body {
   overflow: hidden;
 }
 
+#screen-pdf .pdf-topbar,
+#screen-pdf .pdf-controls {
+  display: flex !important;
+}
+
 .pdf-topbar {
   position: fixed;
   top: 0;
@@ -203,8 +208,9 @@ body {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 64px 0 100px;
+  padding: 70px 8px 100px;
   -webkit-overflow-scrolling: touch;
+  position: relative;
 }
 
 #pdf-canvas {
@@ -243,13 +249,14 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 100;
-  display: flex;
+  z-index: 9998;
+  display: flex !important;
   justify-content: space-between;
   align-items: center;
   padding: 12px 24px;
-  background: rgba(0,0,0,0.7);
+  background: rgba(0,0,0,0.85);
   backdrop-filter: blur(10px);
+  min-height: 80px;
 }
 
 .pdf-nav-btn {
