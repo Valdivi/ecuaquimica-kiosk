@@ -208,7 +208,7 @@ body {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 70px 8px 100px;
+  padding: 64px 64px 16px;
   -webkit-overflow-scrolling: touch;
   position: relative;
 }
@@ -243,28 +243,28 @@ body {
   animation: spin 700ms linear infinite;
 }
 
-/* Botones navegación prev/next */
+/* Botones navegación prev/next — lados a mitad de pantalla */
 .pdf-controls {
   position: fixed;
-  bottom: 0;
+  top: 0;
   left: 0;
   right: 0;
+  bottom: 0;
   z-index: 9998;
   display: flex !important;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 24px;
-  background: rgba(0,0,0,0.85);
-  backdrop-filter: blur(10px);
-  min-height: 80px;
+  padding: 0 12px;
+  pointer-events: none; /* no bloquea el scroll del PDF */
 }
 
 .pdf-nav-btn {
-  width: 64px;
-  height: 64px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   border: none;
-  background: rgba(255,255,255,0.12);
+  background: rgba(80,80,80,0.55);
+  backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -272,17 +272,20 @@ body {
   transition: background var(--transition), transform var(--transition);
   -webkit-tap-highlight-color: transparent;
   outline: none;
+  pointer-events: all; /* sí recibe toques */
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
 }
-.pdf-nav-btn:active { background: rgba(255,255,255,0.25); transform: scale(0.93); }
-.pdf-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+.pdf-nav-btn:active { background: rgba(80,80,80,0.85); transform: scale(0.93); }
+.pdf-nav-btn:disabled { opacity: 0.25; cursor: not-allowed; transform: none; }
+.pdf-nav-btn svg { width: 28px; height: 28px; }
 
 /* Kiosk — botones más grandes */
 @media (min-width: 1079px) and (max-width: 1081px) and (min-height: 1800px) {
+  .pdf-controls { padding: 0 28px; }
   .pdf-nav-btn { width: 120px; height: 120px; }
   .pdf-nav-btn svg { width: 52px; height: 52px; }
   .pdf-topbar { padding: 20px 40px; }
   .pdf-page-info { font-size: 1.3rem; padding: 14px 32px; }
-  .pdf-controls { padding: 20px 40px; }
 }
 
 /* ════════════════════════════════════════════
