@@ -5,7 +5,7 @@
 
 // ── CONFIGURACIÓN ──────────────────────────
 // Pega aquí la URL de tu Google Apps Script desplegado
-const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyGYB3o16pTS3MTc4btsKWBKJSwsda_FPU_AYLo_RBQ85JYAvnQDeHsS6mBPMBymC3f/exec';
+const SHEETS_URL = 'TU_APPS_SCRIPT_URL_AQUI';
 
 // Auto-retorno al inicio tras N segundos de inactividad
 const IDLE_TIMEOUT_MS = 120_000; // 2 minutos
@@ -41,23 +41,113 @@ function showScreen(name) {
   resetIdle();
 }
 
+// ── PDF.js ──────────────────────────────────
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+let pdfDoc     = null;
+let pdfPage    = 1;
+let pdfRendering = false;
+let pdfPending = null;
+
+function renderPage(num) {
+  pdfRendering = true;
+  document.getElementById('pdf-loading').classList.remove('hidden');
+
+  pdfDoc.getPage(num).then(page => {
+    const canvas  = document.getElementById('pdf-canvas');
+    const ctx     = canvas.getContext('2d');
+    const container = document.getElementById('pdf-container');
+
+    // Calcula escala para que quepa en el ancho disponible
+    const containerW = container.clientWidth - 32;
+    const viewport0  = page.getViewport({ scale: 1 });
+    const scale      = containerW / viewport0.width;
+    const viewport   = page.getViewport({ scale });
+
+    canvas.width  = viewport.width;
+    canvas.height = viewport.height;
+
+    page.render({ canvasContext: ctx, viewport }).promise.then(() => {
+      pdfRendering = false;
+      document.getElementById('pdf-loading').classList.add('hidden');
+      document.getElementById('pdf-page-current').textContent = num;
+
+      // Botones prev/next
+      document.getElementById('pdf-prev').disabled = num <= 1;
+      document.getElementById('pdf-next').disabled = num >= pdfDoc.numPages;
+
+      // Scroll al tope al cambiar página
+      container.scrollTop = 0;
+
+      if (pdfPending !== null) {
+        renderPage(pdfPending);
+        pdfPending = null;
+      }
+    });
+  });
+}
+
+function pdfQueuePage(num) {
+  if (pdfRendering) { pdfPending = num; return; }
+  renderPage(num);
+}
+
+function pdfPrevPage() {
+  if (pdfPage <= 1) return;
+  pdfPage--;
+  pdfQueuePage(pdfPage);
+}
+
+function pdfNextPage() {
+  if (!pdfDoc || pdfPage >= pdfDoc.numPages) return;
+  pdfPage++;
+  pdfQueuePage(pdfPage);
+}
+
+// Swipe táctil para pasar páginas
+let touchStartX = 0;
+document.getElementById('pdf-container')?.addEventListener('touchstart', e => {
+  touchStartX = e.touches[0].clientX;
+}, { passive: true });
+document.getElementById('pdf-container')?.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (Math.abs(dx) > 60) {
+    if (dx < 0) pdfNextPage();
+    else pdfPrevPage();
+  }
+}, { passive: true });
+
 // ── Catálogo / PDF ──────────────────────────
 function openCatalog(btn) {
   const pdf   = btn.dataset.pdf;
   const label = btn.dataset.label;
 
-  // Bounce visual
   btn.classList.remove('bounce');
   void btn.offsetWidth;
   btn.classList.add('bounce');
 
-  // Pequeño delay para que se vea el bounce
   setTimeout(() => {
     selectedCatalog = label;
-    const frame = document.getElementById('pdf-frame');
-    // Usamos pdf.js viewer si disponible, si no carga directo
-    frame.src = pdf;
+    pdfPage = 1;
+    pdfDoc  = null;
+
+    document.getElementById('pdf-loading').classList.remove('hidden');
+    document.getElementById('pdf-page-current').textContent = '1';
+    document.getElementById('pdf-page-total').textContent = '—';
+    document.getElementById('pdf-prev').disabled = true;
+    document.getElementById('pdf-next').disabled = true;
+
     showScreen('pdf');
+
+    pdfjsLib.getDocument(pdf).promise.then(doc => {
+      pdfDoc = doc;
+      document.getElementById('pdf-page-total').textContent = doc.numPages;
+      renderPage(1);
+    }).catch(err => {
+      console.error('Error cargando PDF:', err);
+      document.getElementById('pdf-loading').classList.add('hidden');
+    });
   }, 240);
 }
 
@@ -82,7 +172,11 @@ function goBack() {
 
 function goHome() {
   selectedCatalog = '';
-  document.getElementById('pdf-frame').src = '';
+  pdfDoc  = null;
+  pdfPage = 1;
+  const canvas = document.getElementById('pdf-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   clearForm();
   showScreen('main');
 }
@@ -93,7 +187,7 @@ function validateForm() {
   const fields = [
     { id: 'f-nombre',   errId: 'err-nombre',   msg: 'Ingresa tu nombre.' },
     { id: 'f-apellido', errId: 'err-apellido', msg: 'Ingresa tu apellido.' },
-    { id: 'f-telefono', errId: 'err-telefono', msg: 'Ingresa un teléfono válido.', pattern: /^\+?[\d\s\-()]{7,15}$/ },
+    { id: 'f-telefono', errId: 'err-telefono', msg: 'Ingresa mínimo 10 dígitos.', pattern: /^\+?[\d\s\-()]{10,15}$/ },
     { id: 'f-catalogo', errId: 'err-catalogo', msg: 'Selecciona un catálogo.' },
   ];
 
@@ -118,8 +212,8 @@ function validateForm() {
   const emailEl  = document.getElementById('f-email');
   const emailErr = document.getElementById('err-email');
   const emailVal = emailEl.value.trim();
-  if (emailVal && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
-    emailErr.textContent = 'Ingresa un correo válido.';
+  if (emailVal && !/^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(emailVal)) {
+    emailErr.textContent = 'Ingresa un correo válido (ej: nombre@empresa.com).';
     emailEl.classList.add('has-error');
     valid = false;
   }
